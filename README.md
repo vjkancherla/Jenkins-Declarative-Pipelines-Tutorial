@@ -1,1 +1,0 @@
-# Jenkins-Declarative-Pipelines-Tutorial

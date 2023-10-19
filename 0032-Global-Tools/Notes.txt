@@ -1,0 +1,16 @@
+=======================
+MANAGING GLOBAL TOOLS
+=======================
+- Global Tool Configurations or "Jenkins Tools", is a feature in Jenkins that allows administrators to configure and 
+   manage various tools and software installations that are required for building, testing, and deploying projects within 
+   a Jenkins environment. These tools can include things like JDK (Java Development Kit) installations, version control systems 
+   (e.g., Git, Subversion), build tools (e.g., Maven, Gradle), and more.
+
+- Label Expressions: You can associate tools with specific build agents or nodes using label expressions. 
+             This allows you to ensure that the appropriate tools are available on agents where specific jobs are executed.
+
+- Environment Variables: Once tools are configured globally, Jenkins sets up environment variables that can be used within Jenkins jobs. 
+            These variables allow you to reference the configured tool installations in your build scripts or commands.
+
+- See this video for installing and using global tools (default and custom):
+	- https://www.youtube.com/watch?v=L9Ite-1pEU8

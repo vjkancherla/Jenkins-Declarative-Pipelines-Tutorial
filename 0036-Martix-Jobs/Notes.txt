@@ -1,0 +1,6 @@
+======================================
+PARALLEL PIPELINES WITH MATRIX BUILDS
+========================================
+- Excellent read: https://www.jenkins.io/blog/2019/11/22/welcome-to-the-matrix/
+- Watch video: https://www.youtube.com/watch?v=HsvO2nDlDSI
+

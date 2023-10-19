@@ -1,0 +1,26 @@
+CHANGING THE BUILD RESULT / SETTING A CUSTOM BUILD RESULT
+	- To change the build result or set a custom build result, you can use the "currentBuild" object, 
+		which represents the current pipeline build
+		
+	====
+	pipeline {
+		agent any
+
+		stages {
+			stage('Example Stage') {
+				steps {
+					// Perform some build steps
+
+					// Check a condition and set the custom result
+					if (someCondition) {
+						currentBuild.result = 'SUCCESS' // Set custom success result
+					} else if (someOtherCondition ){
+						currentBuild.result = 'UNSTABLE' // Set custom unstable result
+					} else {
+						currentBuild.result = 'FAILURE'
+					}
+				}
+			}
+		}
+	}
+	====

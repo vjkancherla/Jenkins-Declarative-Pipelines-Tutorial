@@ -1,0 +1,104 @@
+<<<<<<<<<<<
+VARIABLES
+>>>>>>>>>>>
+	- variables do not have a type (compared to Java)
+	- eg: name = "vij"
+	
+	Predefined Variables
+		- all the Predefined vars that Jenkins provides by default can be viewed at:
+			http://localhost:8080/env-vars.html/
+			
+		- using a Predefined var - BUILD_NUMBER
+			- echo "The current build no is: $BUILD_NUMBER"
+			
+	User-defined Variables
+		- user-defined vars can be created at 
+			- Global (Pipeline) level, using "environment" block
+				- NOTE that vars set within the environment block cannot be overridden using "env.var_name=some_new_value"
+			- Stage level, using "environment" block
+			- Script level, using "script" block
+
+        - Global vars:
+            ===
+            FNAME = "VJ" //Global
+			LNAME = "KAN" //Global
+            
+            pipeline {
+				agent any
+				stages {
+					stage ("1") {
+						steps {
+							echo "$FNAME - $LNAME"
+						}
+					}
+				}
+			}
+            ===
+			
+		- Global Environment vars:
+			===
+			pipeline {
+				agent any
+				environment {
+					FNAME = "VJ"
+					LNAME = "KAN"
+				}
+				stages {
+					stage ("1") {
+						steps {
+							echo "$FNAME - $LNAME"
+						}
+					}
+				}
+			}
+			===
+			
+		- Stage level vars:
+			===
+			pipeline {
+				agent any
+				stages {
+					stage ("1") {
+						environment {
+							FNAME = "VJ"
+							LNAME = "KAN"
+						}
+						steps {
+							echo "$FNAME - $LNAME"
+						}
+					}
+				}
+			}
+			===
+			
+		NOTE: the vars defined inside a environment block can be referenced as - "${VAR_NAME}" or "${env.VAR_NAME}"
+		
+			
+		- Steps level vars:
+			===
+			pipeline {
+				agent any
+				stages {
+					stage ("1") {
+						steps {
+							script {
+								FNAME = "VJ"
+								LNAME = "KAN"
+							}
+							echo "$FNAME - $LNAME"
+						}
+					}
+				}
+			}
+			===
+			
+	
+	Scope of variables
+		- if a variable with the same name is defined at global, stage and script levels, 
+			the narrowest scoped variable will take precedence
+	
+	IMPORTANT: if a variable with the same name is defined at global or stage, and at script level,
+	you can reference the global/stage var using- "{env.var_name}" 
+
+	IMPORTANT: so, global or stage vars can be reference as - just "$var_name" or "${env.var_name}"
+	

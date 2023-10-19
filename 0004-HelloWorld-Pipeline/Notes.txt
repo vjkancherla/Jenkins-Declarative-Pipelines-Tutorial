@@ -1,0 +1,15 @@
+>>>>>>>>>>>>>>>>>>>>>>
+HELLO WORLD PIPELINE
+<<<<<<<<<<<<<<<<<<<<<<
+===
+pipeline {
+	agent any
+	stages {
+		stage ("Print HW") {
+			steps {
+				echo "HELLO WORLD"
+			}
+		}
+	}
+}
+===

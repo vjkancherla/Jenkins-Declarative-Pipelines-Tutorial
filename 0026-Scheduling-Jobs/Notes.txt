@@ -1,0 +1,48 @@
+<<<<<<<<<<<<<<<<<<<<<
+SCHEDULING JOBS
+>>>>>>>>>>>>>>>>>>>>>
+- USING CRON
+	- Cron is a time-based scheduler.
+	- Cron triggers are useful when you want to run a job at specific, regular intervals, 
+	  regardless of whether there are changes in your source code repository.
+	- Cron triggers are not dependent on source code changes. 
+	  They are purely time-based and execute according to the specified schedule.
+	
+	====
+	pipeline {
+		agent any
+		
+		triggers {
+			cron('0 * * * *')  // This runs the pipeline every hour
+		}
+		
+		stages {
+			stage('Build') {
+				steps {
+				}
+			}
+		}
+	}
+	====
+
+- USING POLLSCM
+	- Poll SCM is time AND source code-driven. 
+	- It run on a schedule and monitors your source code repository for changes and 
+	  triggers the job or pipeline when it detects new commits or changes in the repository.
+
+	====
+	pipeline {
+		agent any
+		
+		triggers {
+			pollSCM('H * * * *')  // checks the repo for changes every hour
+		}
+		
+		stages {
+			stage('Build') {
+				steps {
+				}
+			}
+		}
+	}
+	====

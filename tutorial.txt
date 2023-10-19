@@ -1,0 +1,989 @@
+===================
+JENKINS TUTORIAL
+===================
+
+Source: UDEMY Course: Master in Jenkins Declarative Pipeline with 100+ Examples
+
+
+<<<<<<<<<<<<<<<<<<<<
+TYPES OF PIPELINES
+>>>>>>>>>>>>>>>>>>>>
+
+	- Declarative
+		- recent addition
+		- the pipeline script starts with:
+			===
+			pipeline {
+			}
+			===
+		
+	- Scripted
+		- the pipeline script starts with:
+			===
+			node {
+			}
+			===
+			
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+MAIN COMPONENTS OF A PIPELINE
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+====
+pipeline { <---- specifies that this is a Declarative pipeline
+	agent any  <--- On which node to run the job
+	stages { <--- Collection of stages
+		stage ("1") { <--- Individual stage
+			steps {
+				script {
+					/// <--- commands to run, either using "sh" block or "script" block
+				}
+			}
+		}
+		stage ("2") {
+			steps {
+				script {
+					///
+				}
+			}
+		}
+	}
+}
+====
+
+
+<<<<<<<<<<<<<<<<<<<
+THE SCRIPT BLOCK/STEP
+>>>>>>>>>>>>>>>>>>>
+	- The script step takes a block of Scripted Pipeline and executes that in the Declarative Pipeline
+	- Most functionality provided by the Groovy language is made available to users of Scripted Pipeline, which means it can be a very expressive
+	- Script blocks of non-trivial size and/or complexity should be moved into Shared Libraries instead.
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>
+HELLO WORLD PIPELINE
+<<<<<<<<<<<<<<<<<<<<<<
+===
+pipeline {
+	agent any
+	stages {
+		stage ("Print HW") {
+			steps {
+				echo "HELLO WORLD"
+			}
+		}
+	}
+}
+===
+
+
+<<<<<<<<<<
+COMMENTS
+>>>>>>>>>>
+	- similar to Java
+	- use "//" for single line comment
+	- use "/*  .... */" for muti-line comment
+	- use "echo" to print statements
+		- echo "Hello World"
+	
+		
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+RUNNING SINGLE COMMANDS
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- sh "cat /tmp/vars.txt"
+	- sh "df -h"
+	- sh "touch /tmp/tmpfile.txt"
+	
+	
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+RUNNING MULTIPLE COMMANDS
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- use tripe quotes - """
+	- eg:
+		====
+		sh """
+			cat /tmp/vars.txt
+			df -h
+			touch /tmp/tmpfile.txt
+		"""
+		====
+	
+<<<<<<<<<<<
+VARIABLES
+>>>>>>>>>>>
+	- variables do not have a type (compared to Java)
+	- eg: name = "vij"
+	
+	Predefined Variables
+		- all the Predefined vars that Jenkins provides by default can be viewed at:
+			http://localhost:8080/env-vars.html/
+			
+		- using a Predefined var - BUILD_NUMBER
+			- echo "The current build no is: $BUILD_NUMBER"
+			
+	User-defined Variables
+		- user-defined vars can be created at 
+			- Global (Pipeline) level, using "environment" block
+				- NOTE that vars set within the environment block cannot be overridden using "env.var_name=some_new_value"
+			- Stage level, using "environment" block
+			- Script level, using "script" block
+			
+		- Global level vars:
+			===
+			pipeline {
+				agent any
+				environment {
+					FNAME = "VJ"
+					LNAME = "KAN"
+				}
+				stages {
+					stage ("1") {
+						steps {
+							echo "$FNAME - $LNAME"
+						}
+					}
+				}
+			}
+			===
+			
+		- Stage level vars:
+			===
+			pipeline {
+				agent any
+				stages {
+					stage ("1") {
+						environment {
+							FNAME = "VJ"
+							LNAME = "KAN"
+						}
+						steps {
+							echo "$FNAME - $LNAME"
+						}
+					}
+				}
+			}
+			===
+			
+		NOTE: the vars defined inside a environment block can be referenced as - "${VAR_NAME}" or "${env.VAR_NAME}"
+		
+			
+		- Steps level vars:
+			===
+			pipeline {
+				agent any
+				stages {
+					stage ("1") {
+						steps {
+							script {
+								FNAME = "VJ"
+								LNAME = "KAN"
+							}
+							echo "$FNAME - $LNAME"
+						}
+					}
+				}
+			}
+			===
+			
+	
+	Scope of variables
+		- if a variable with the same name is defined at global, stage and script levels, 
+			the narrowest scoped variable will take precedence
+	
+	IMPORTANT: if a variable with the same name is defined at global or stage, and at script level,
+	you can reference the global/stage var using- "{env.var_name}" 
+
+	IMPORTANT: so, global or stage vars can be reference as - just "$var_name" or "${env.var_name}"
+	
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+SINGLE VS DOUBLE QUOTES STRINGS
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- A single quoted string does no variable expansion. A double quoted string expands variable references.
+	
+	eg1: 
+	===
+	script {
+		NAME = "VJ"
+		LNAME = "KAN"
+	}
+	echo "$FNAME - $LNAME" --> Outputs "VJ - KAN"
+	===
+	
+	eg2:
+	===
+	script {
+		NAME = "VJ"
+		LNAME = "KAN"
+	}
+	echo '$FNAME - $LNAME' --> Outputs "$FNAME - $LNAME"
+	===
+	
+	
+<<<<<<<<<<<<<<<<<<<<<<<
+STRING CONCATENATION
+>>>>>>>>>>>>>>>>>>>>>>>
+	- very similar to Java, uses "+" operator	
+	
+	eg1: 
+	===
+	script {
+		NAME = "VJ"
+		LNAME = "KAN"
+		FULLNAME = NAME+""+LNAME
+	}
+	echo "$FULLNAME" --> Outputs "VJ KAN"
+	===
+	
+	eg2: 
+	===
+	script {
+		NAME = "VJ"
+		LNAME = "KAN"
+	}
+	echo "$FNAME $LNAME" --> Outputs "VJ KAN"
+	===
+			
+
+<<<<<<<<<<<<<<
+PARAMETERS
+>>>>>>>>>>>>>>
+	- dynamically pass values to variables
+	
+	Types of Parameters:
+		- String
+		- Text : multi-line string
+		- Boolean
+		- Choice: a drop-down list
+		- Password: a masked string
+		- File: a raw file
+		
+	EXAMPLE:
+	====
+	pipeline {
+		agent any
+
+		parameters {
+			string(name: 'STRING_PARAM', defaultValue: 'Default String', description: 'Enter a string parameter')
+			text(name: 'TEXT_PARAM', defaultValue: 'Default Text', description: 'Enter a text parameter')
+			password(name: 'PASSWORD_PARAM', defaultValue: 'DefaultPassword', description: 'Enter a password parameter')
+			choice(name: 'CHOICE_PARAM', choices: ['Option 1', 'Option 2', 'Option 3'], description: 'Select a choice')
+			file(name: 'FILE_PARAM', description: 'Upload a file')
+			booleanParam(name: 'BOOLEAN_PARAM', defaultValue: true, description: 'Enable or disable a feature')
+		}
+
+		stages {
+			stage('Parameterized Build') {
+				steps {
+					script {
+						echo "String Parameter: ${params.STRING_PARAM}"
+						echo "Text Parameter: ${params.TEXT_PARAM}"
+						echo "Password Parameter: ${params.PASSWORD_PARAM}"
+						echo "Choice Parameter: ${params.CHOICE_PARAM}"
+						echo "Boolean Parameter: ${params.BOOLEAN_PARAM}"
+
+						// Accessing file parameter
+						def fileContent = readFile params.FILE_PARAM
+						echo "File Parameter Content:\n${fileContent}"
+					}
+				}
+			}
+		}
+	}
+	====
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+DYNAMIC PARAMETERS. GENERATE DOWNSTREAM PARAMS BASED ON A PREVIOUS PARAM SELECTION
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+- https://www.youtube.com/watch?v=bYi4IXep2mk&list=PLLYW3zEOaqlKmPyhjIrT4RmmQDQYYrTjk&index=6
+- Declarative pipelines do not support defining parameters with the activeChoiceParam block directly 
+	- To do so, see this: https://stackoverflow.com/questions/43410204/active-choices-reactive-reference-parameter-in-jenkins-pipeline
+- Instead, you should use the Active Choices plugin in a freestyle or scripted pipeline.
+
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+IF/ELSE CONDITIONS WITH PARAMETERS
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+EXAMPLE:
+=====
+	pipeline {
+		agent any
+
+		parameters {
+			string(name: 'ACTION', defaultValue: 'build', description: 'Specify action: build or deploy')
+			booleanParam(name: 'DEBUG', defaultValue: false, description: 'Enable debugging')
+		}
+
+		stages {
+			stage('Check Action') {
+				steps {
+					script {
+						def action = params.ACTION.toLowerCase()
+						def debug = params.DEBUG
+
+						echo "Action: ${action}"
+						echo "Debug Mode: ${debug}"
+
+						if (action == 'build') {
+							echo 'Building the application...'
+							// Add build steps here
+						} else if (action == 'deploy') {
+							echo 'Deploying the application...'
+							// Add deployment steps here
+						} else {
+							error("Invalid action specified: ${action}. Please use 'build' or 'deploy'.")
+						}
+
+						if (debug) {
+							echo 'Debugging enabled. Additional debugging steps can be added here.'
+						}
+					}
+				}
+			}
+		}
+	}
+=====
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+ABORTING A BUILD BASED ON PARAMETERS
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+EXAMPLE:
+====
+pipeline {
+	agent any
+
+	parameters {
+		choice(name: 'DRY_RUN', choices: ['Yes', 'No'], description: 'Do you need a DRY-RUN?')
+		string(name: 'ACTION', defaultValue: 'build', description: 'Specify action: build or deploy')
+		booleanParam(name: 'DEBUG', defaultValue: false, description: 'Enable debugging')
+	}
+
+	stages {
+		stage('Check Action') {
+			steps {
+				script {
+					if ("${params.DRY_RUN}" == "Yes") {
+						currentBuild.result = 'aborted'
+						//echo "DRY-RUN completed."
+						error("DRY-RUN completed.")
+					}
+				}
+			}
+		}
+	}
+}
+====
+
+
+<<<<<<<<<<<<<<<<<<<<<
+OPTIONS BLOCK
+>>>>>>>>>>>>>>>>>>>>>
+The "options" block is a child of the "Pipleline" block.
+
+Example:
+====
+pipeline {
+	agent any
+
+	options {
+		retry (2)
+	}
+}
+====
+
+Some important directives to use with Options block:
+	- retry
+	- buildDiscarder
+	- disableConcurrentBuilds
+	- Timeout
+	- Timestamps
+	
+
+- retry(<NO OF TIMES>) DIRECTIVE 
+	- if defined in the options block, it retries the current stage where the failure occurs.
+	Example:
+		====
+		retried = "false" // GLOBAL var
+
+		pipeline {
+			agent any
+
+			options {
+				retry(3) // Retry the whole pipeline 3 time if it fails
+			}
+
+			stages {
+				stage('Retry Example') {
+					steps {
+						script {
+							echo "${retried}"
+							if (retried == "false") {
+								retried = "true"
+								sh "exit 42"
+							} else {
+								sh "exit 0"
+							}
+						}
+					}
+				}
+			}
+		}
+
+		====
+
+	- The "retry" directive is typically used within a "catchError" block, which specifies the code to 
+	  retry and the conditions under which it should be retried. The basic syntax looks like this:
+	  ====
+	  catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+			retry(limit: 3) { <---- retry 3 times
+				// Code to be retried
+			}
+		}
+
+	  ====
+
+	  =====
+		pipeline {
+			agent any
+
+			stages {
+				stage('Retry Example') {
+					steps {
+						catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+							retry(limit: 3) {
+								sh 'some-command-that-might-fail'
+							}
+						}
+					}
+				}
+			}
+		}
+	  =====
+
+	- "Retry" an downstream job on failure, with a manual input prompt"
+
+		=====
+		stage('deploy-test') {
+			try {
+				build 'yourJob'
+			} catch(error) {
+				echo "First build failed, let's retry if accepted"
+				retry(2) {
+					input "Retry the job ?"
+					build 'yourJob'
+				}
+			}
+		}
+		=====
+
+
+- buildDiscarder DIRECTIVE
+	-  define how and when build records or artifacts are discarded for a particular Jenkins job or pipeline
+	
+	=====
+	pipeline {
+		agent any
+
+		options {
+			buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '5'))
+		}
+
+		stages {
+			// Define your pipeline stages here
+		}
+	}
+
+	=====
+
+	numToKeepStr specifies that the latest 10 builds should be kept for the build records, and older builds should be discarded.
+	artifactNumToKeepStr specifies that the latest 5 builds' artifacts (e.g., files generated during the build) should be kept.
+	
+	
+- disableConcurrentBuilds DIRECTIVE
+	- The disableConcurrentBuilds directive in Jenkins Declarative Pipelines is used to prevent multiple 
+	  concurrent executions of the entire job or a specific stage.
+
+	=====
+	Prevent concurrent executions of the entire job 
+
+	pipeline {
+		options {
+			disableConcurrentBuilds()
+		}
+	}
+	=====
+
+	=====
+	Prevent concurrent executions of a stage
+	stages {
+        stage('Non-Concurrent Stage') {
+            disableConcurrentBuilds() // Disable concurrent executions of this stage
+
+            steps {
+                // Your stage steps here
+            }
+        }
+        // Other stages...
+    }
+	=====
+
+	- timeout DIRECTIVE
+		- The timeout directive is used to set a time limit for the execution of the entire job, a specific stage or a block of code within a stage
+
+		======
+		Set timeout for entire job
+
+		pipeline {
+			options {
+				timeout(time: 30, unit: 'MINUTES')
+			}
+		}
+		======
+
+		======
+		Set timeout for a Stage
+
+		stage('Build and Test') {
+			steps {
+				timeout(time: 30, unit: 'MINUTES') {
+					sh 'build-and-test-command'
+				}
+			}
+		}
+		=======
+
+	- timestamp Directive
+		- display the timestamp for when that code or step starts and finishes executing
+
+		=====
+		pipeline {
+			options {
+				timestamps ()
+			}
+		}
+		=====
+
+
+<<<<<<<<<<<<<<<<<<<<
+TRIGERRING BUILDS
+>>>>>>>>>>>>>>>>>>>>>
+
+- TRIGGERING ANOTHER/OTHER DOWNSTREAM JOBS/PIPELINES FROM WITHIN A PIPELINE
+    - use the "build" step
+    - https://www.jenkins.io/doc/pipeline/steps/pipeline-build-step/
+
+	=====
+	Pipeline-A
+	--
+	pipeline {
+		agent any
+
+		stages {
+			stage('Trigger Pipeline B') {
+				steps {
+					build(job: 'Pipeline-B-Job', parameters: [
+						string(name: 'PARAMETER_NAME', value: 'PARAMETER_VALUE'),
+						// Add other parameters as needed
+						],
+						propagate: false, wait: true
+					)
+
+					build(job: 'Pipeline-C-Job', parameters: [
+							string(name: 'PARAMETER_NAME', value: 'PARAMETER_VALUE'),
+							// Add other parameters as needed
+						],
+						propagate: false, wait: true
+					)
+				}
+			}
+		}
+		// Other stages in Pipeline A
+	}
+	=====
+
+		- propagate: false is used to indicate that the current build should not fail if the downstream job (Downstream-Job) fails. 
+		- wait: true is optional but recommended when using propagate: false. It indicates that the current build should wait for the completion of the downstream job before moving on to the next steps in the pipeline.
+
+
+- [Option-1] TRIGGERING A DOWNSTREAM PIPELINE AUTOMATICALLY, WHEN A PIPLEINE COMPLETES
+	- we need to run Pipeline-B, only after the successfull completion of Pipeline-A
+
+	====
+	pipeline {
+		agent any
+
+		stages {
+			stage('Build and Test') {
+				steps {
+					// Your build and test steps here
+				}
+			}
+		}
+
+		post {
+			success {
+				// Trigger Pipeline B upon successful completion of Pipeline A
+				build job: 'Pipeline-B', wait: false
+			}
+		}
+	}
+	====
+
+
+- [Option-2] TRIGGERING A DOWNSTREAM PIPELINE AUTOMATICALLY, WHEN AN UPSTREAM PIPLEINE COMPLETES
+	- To configure a downstream pipeline to watch the upstream pipeline and then execute when the upstream pipeline completes, 
+	  you can use the "Build after other projects are built" trigger in Jenkins.
+
+	- This is helpful when you do not want to modify the upstream pipeline
+
+	- See: https://www.youtube.com/watch?v=TXPSgBwGrpg
+
+
+- CHANGING THE BUILD RESULT / SETTING A CUSTOM BUILD RESULT
+	- To change the build result or set a custom build result, you can use the "currentBuild" object, 
+		which represents the current pipeline build
+		
+	====
+	pipeline {
+		agent any
+
+		stages {
+			stage('Example Stage') {
+				steps {
+					// Perform some build steps
+
+					// Check a condition and set the custom result
+					if (someCondition) {
+						currentBuild.result = 'SUCCESS' // Set custom success result
+					} else if (someOtherCondition ){
+						currentBuild.result = 'UNSTABLE' // Set custom unstable result
+					} else {
+						currentBuild.result = 'FAILURE'
+					}
+				}
+			}
+		}
+	}
+	====
+
+
+<<<<<<<<<<<<<<<<<<<<<
+SCHEDULING JOBS
+>>>>>>>>>>>>>>>>>>>>>
+- USING CRON
+	- Cron is a time-based scheduler.
+	- Cron triggers are useful when you want to run a job at specific, regular intervals, 
+	  regardless of whether there are changes in your source code repository.
+	- Cron triggers are not dependent on source code changes. 
+	  They are purely time-based and execute according to the specified schedule.
+	
+	====
+	pipeline {
+		agent any
+		
+		triggers {
+			cron('0 * * * *')  // This runs the pipeline every hour
+		}
+		
+		stages {
+			stage('Build') {
+				steps {
+				}
+			}
+		}
+	}
+	====
+
+- USING POLLSCM
+	- Poll SCM is time AND source code-driven. 
+	- It run on a schedule and monitors your source code repository for changes and 
+	  triggers the job or pipeline when it detects new commits or changes in the repository.
+
+	====
+	pipeline {
+		agent any
+		
+		triggers {
+			pollSCM('H * * * *')  // checks the repo for changes every hour
+		}
+		
+		stages {
+			stage('Build') {
+				steps {
+				}
+			}
+		}
+	}
+	====
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+EXECUTING TASKS/STEPS/JOBS IN PARALLEL
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+- The "parallel" directive in Jenkins Pipeline allows you to execute multiple stages or tasks concurrently.
+
+	=====
+	pipeline {
+		agent any
+
+		stages {
+			stage('Parallel Stages') {
+				parallel {
+					stage('Stage 1') {
+						steps {
+							echo 'Executing Stage 1'
+						}
+					}
+					stage('Stage 2') {
+						steps {
+							echo 'Executing Stage 2'
+						}
+					}
+				}
+			}
+		}
+	}
+	=====
+
+- TRIGGERING DOWNSTREAM JOBS IN PARALLEL
+
+	=====
+	pipeline {
+		agent any
+
+		stages {
+			stage('Parallel Stages') {
+				parallel {
+					stage('Run DownStream Job-A') {
+						steps {
+							build(job: 'Pipeline-A-Job')
+						}
+					}
+					stage('Run DownStream Job-B') {
+						steps {
+							build(job: 'Pipeline-B-Job')
+						}
+					}
+				}
+			}
+		}
+	}
+	=====
+
+
+- USING "FAILFAST" TO FAIL THE WHOLE BUILD WHEN A PARALLEL TASK FAILS
+	- The failFast option in Jenkins Pipeline's parallel directive controls how the pipeline behaves 
+	  when one or more parallel branches (also known as stages) encounter a failure
+	- By default, if you don't specify the failFast option, Jenkins Pipeline will wait for all parallel branches 
+	  to complete before determining the overall result of the parallel block. 
+	- If you set "failFast: true", the behavior changes. When any of the parallel branches fails, the parallel block 
+	  will immediately mark the entire parallel block as failed, and the pipeline execution will be terminated f
+	  or all remaining parallel branches.
+
+	=====
+	pipeline {
+		agent any
+
+		stages {
+			stage('Parallel Stages') {
+				parallel (failFast: true) {
+					stage('Run DownStream Job-A') {
+						steps {
+							build(job: 'Pipeline-A-Job')
+						}
+					}
+					stage('Run DownStream Job-B') {
+						steps {
+							build(job: 'Pipeline-B-Job')
+						}
+					}
+				}
+			}
+		}
+	}
+	=====
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+POST SECTION AND POST BLOCKS
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+- In Jenkins Pipeline, the "post" section is used to define actions or steps that should be taken after the 
+    main build pipeline has completed, regardless of whether the build was successful or not.
+
+- It allows you to specify post-build actions such as notifications, clean-up tasks, or deployment steps, among others.
+
+	EXAMPLE:
+		=====
+		pipeline {
+			agent any 
+			stages {
+
+			}
+
+			post {
+				success {
+					// Actions to be performed when the build is successful
+					echo 'Build succeeded!'
+				}
+				failure {
+					// Actions to be performed when the build fails
+					echo 'Build failed!'
+				}
+				always {
+					// Actions to be performed regardless of success or failure
+					echo 'Cleaning up...'
+				}
+			}
+		}
+		=====
+
+POST BLOCKS
+-----------------
+- Here's a list of the blocks that can be defined in the "post" section:
+NOTE: the blocks defined in the "post" section are executed in the below order.
+
+- 'always': This block contains actions that will always be executed, regardless of whether the build was successful or not. 
+            It's typically used for cleanup tasks or actions that should occur under all circumstances.
+
+- 'success': Actions defined in this block are executed only if the main stages of the pipeline were successful (i.e., all previous stages passed without errors).
+
+- 'failure': Actions defined in this block are executed only if the main stages of the pipeline failed (i.e., at least one previous stage encountered an error).
+
+- 'unstable': This block allows you to specify actions that should be taken if the build results in an "unstable" state. 
+              In Jenkins, builds can be marked as "unstable" when certain conditions are met, such as 
+			  failing test cases but not necessarily failing the entire build.
+
+- 'changed': The "changed" block allows you to define actions that should be taken if the current build's status differs 
+             from the previous build's status. For example, if the previous build was successful, but the current build failed, 
+			 you can define specific actions here.
+
+- 'fixed': This block is used to specify actions that should be taken if the current build is a "fixed" build, meaning it 
+           successfully resolved a previous failure. For example, if the last build failed but the current build passed, you 
+		   can define actions in the "fixed" block.
+
+- 'aborted': Actions defined in this block are executed if the pipeline was manually aborted by a user.
+
+- 'changedAsOf': This block allows you to define actions based on changes in the build result compared to a specific build number. 
+                 For example, you can specify actions to be taken if the build status changed since build #5.
+
+- Custom Conditions: You can define custom conditions using expressions in the "post" section. For example, you can use 
+                     the script block to execute a Groovy script that determines whether specific actions should be taken based 
+					 on custom logic.
+
+	EXAMPLE POST CUSTOM CONDITON: 
+		======
+		post {
+			script {
+				// Custom condition using Groovy script
+				if (currentBuild.resultIsWorseThan('SUCCESS')) {
+					// Take some custom action
+				}
+			}
+		}
+		======
+
+
+=======================
+MANAGING GLOBAL TOOLS
+=======================
+- Global Tool Configurations or "Jenkins Tools", is a feature in Jenkins that allows administrators to configure and 
+   manage various tools and software installations that are required for building, testing, and deploying projects within 
+   a Jenkins environment. These tools can include things like JDK (Java Development Kit) installations, version control systems 
+   (e.g., Git, Subversion), build tools (e.g., Maven, Gradle), and more.
+
+- Label Expressions: You can associate tools with specific build agents or nodes using label expressions. 
+             This allows you to ensure that the appropriate tools are available on agents where specific jobs are executed.
+
+- Environment Variables: Once tools are configured globally, Jenkins sets up environment variables that can be used within Jenkins jobs. 
+            These variables allow you to reference the configured tool installations in your build scripts or commands.
+
+- See this video for installing and using global tools (default and custom):
+	- https://www.youtube.com/watch?v=L9Ite-1pEU8
+
+
+
+=================================================
+WHEN DIRECTIVE TO CONTROL STAGE/BLOCK EXECUTION
+=================================================
+- The when directive allows you to specify conditions under which a stage or a block of stages should be executed. 
+
+EXAMPLE:
+1. Build the application for every push to the repository.
+2. Run tests only if the code is pushed to the main branch.
+3. Deploy to a staging environment if the tests pass and the code is pushed to the main branch.
+
+-----
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        stage('Test') {
+            when {
+                expression { currentBuild.branch == 'main' }
+            }
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('Deploy to Staging') {
+            when {
+                allOf {
+                    expression { currentBuild.branch == 'main' }
+                    expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
+                }
+            }
+            steps {
+                sh 'deploy-to-staging.sh'
+            }
+        }
+    }
+}
+-----
+
+
+=======
+LOOPS
+=======
+EXAMPLE: use the script step Groovy scripts
+	------
+	stage('Loop Example') {
+		steps {
+			script {
+				for (int i = 1; i <= 5; i++) {
+					echo "Iteration ${i}"
+					// Add your logic here
+				}
+			}
+		}
+	}
+	------
+
+EXAMPLE: using the popular "Jenkins Pipeline Utility Steps" plugin, which includes a for loop step
+	------
+	stage('Loop Example') {
+		steps {
+			script {
+				def items = [1, 2, 3, 4, 5]
+				for (item in items) {
+					echo "Iteration ${item}"
+					// Add your logic here
+				}
+			}
+		}
+	}
+	------
+
+
+======================================
+PARALLEL PIPELINES WITH MATRIX BUILDS
+========================================
+- Excellent read: https://www.jenkins.io/blog/2019/11/22/welcome-to-the-matrix/
+- Watch video: https://www.youtube.com/watch?v=HsvO2nDlDSI
+

@@ -1,0 +1,58 @@
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+RUNNING SINGLE COMMANDS
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- sh "cat /tmp/vars.txt"
+	- sh "df -h"
+	- sh "touch /tmp/tmpfile.txt"
+
+Example:
+    ----
+    pipeline {
+        agent any
+        stages {
+            stage ("Execute individual steps") {
+                steps {
+                    script {
+                         sh "cat /tmp/vars.txt"
+                         sh "df -h"
+                         sh "touch /tmp/tmpfile.txt"
+                    }
+                }
+            }
+        }
+    }
+    ----
+	
+	
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+RUNNING MULTIPLE COMMANDS
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- use tripe quotes - """
+	- eg:
+		====
+		sh """
+			cat /tmp/vars.txt
+			df -h
+			touch /tmp/tmpfile.txt
+		"""
+		====
+
+EXAMPLE:
+    -----
+    pipeline {
+        agent any
+        stages {
+            stage ("Execute individual steps") {
+                steps {
+                    script {
+                         sh """
+                            cat /tmp/vars.txt
+                            df -h
+                            touch /tmp/tmpfile.txt
+		                """ 
+                    }
+                }
+            }
+        }
+    }
+    -----

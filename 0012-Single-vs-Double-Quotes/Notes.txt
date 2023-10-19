@@ -1,0 +1,22 @@
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+SINGLE VS DOUBLE QUOTES STRINGS
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- A single quoted string does no variable expansion. A double quoted string expands variable references.
+	
+	eg1: 
+	===
+	script {
+		NAME = "VJ"
+		LNAME = "KAN"
+	}
+	echo "$FNAME - $LNAME" --> Outputs "VJ - KAN"
+	===
+	
+	eg2:
+	===
+	script {
+		NAME = "VJ"
+		LNAME = "KAN"
+	}
+	echo '$FNAME - $LNAME' --> Outputs "$FNAME - $LNAME"
+	===

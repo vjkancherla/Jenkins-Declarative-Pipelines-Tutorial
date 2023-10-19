@@ -1,0 +1,80 @@
+<<<<<<<<<<<<<<<<<<<<<
+OPTIONS BLOCK
+>>>>>>>>>>>>>>>>>>>>>
+- retry(<NO OF TIMES>) DIRECTIVE 
+	- if defined in the options block, it retries the current stage where the failure occurs.
+	Example:
+		====
+		retried = "false" // GLOBAL var
+
+		pipeline {
+			agent any
+
+			options {
+				retry(3) // Retry the whole pipeline 3 time if it fails
+			}
+
+			stages {
+				stage('Retry Example') {
+					steps {
+						script {
+							echo "${retried}"
+							if (retried == "false") {
+								retried = "true"
+								sh "exit 42"
+							} else {
+								sh "exit 0"
+							}
+						}
+					}
+				}
+			}
+		}
+
+		====
+
+	- The "retry" directive is typically used within a "catchError" block, which specifies the code to 
+	  retry and the conditions under which it should be retried. The basic syntax looks like this:
+	  ====
+	  catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+			retry(limit: 3) { <---- retry 3 times
+				// Code to be retried
+			}
+		}
+
+	  ====
+
+	  =====
+		pipeline {
+			agent any
+
+			stages {
+				stage('Retry Example') {
+					steps {
+						catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+							retry(limit: 3) {
+								sh 'some-command-that-might-fail'
+							}
+						}
+					}
+				}
+			}
+		}
+	  =====
+
+	- "Retry" an downstream job on failure, with a manual input prompt"
+
+		=====
+		stage('deploy-test') {
+			try {
+				build 'yourJob'
+			} catch(error) {
+				echo "First build failed, let's retry if accepted"
+				retry(2) {
+					input "Retry the job ?"
+					build 'yourJob'
+				}
+			}
+		}
+		=====
+		

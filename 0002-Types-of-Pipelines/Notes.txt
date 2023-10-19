@@ -1,0 +1,52 @@
+<<<<<<<<<<<<<<<<<<<<
+TYPES OF PIPELINES
+>>>>>>>>>>>>>>>>>>>>
+
+	- Declarative
+		- recent addition
+		- the pipeline script starts with:
+			===
+			pipeline {
+			}
+			===
+		
+	- Scripted
+		- the pipeline script starts with:
+			===
+			node {
+			}
+			===
+			
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+MAIN COMPONENTS OF A PIPELINE
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+====
+pipeline { <---- specifies that this is a Declarative pipeline
+	agent any  <--- On which node to run the job
+	stages { <--- Collection of stages
+		stage ("1") { <--- Individual stage
+			steps {
+				script {
+					/// <--- commands to run, either using "sh" block or "script" block
+				}
+			}
+		}
+		stage ("2") {
+			steps {
+				script {
+					///
+				}
+			}
+		}
+	}
+}
+====
+
+
+<<<<<<<<<<<<<<<<<<<
+THE SCRIPT BLOCK/STEP
+>>>>>>>>>>>>>>>>>>>
+	- The script step takes a block of Scripted Pipeline and executes that in the Declarative Pipeline
+	- Most functionality provided by the Groovy language is made available to users of Scripted Pipeline, which means it can be a very expressive
+	- Script blocks of non-trivial size and/or complexity should be moved into Shared Libraries instead.

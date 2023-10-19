@@ -1,0 +1,8 @@
+<<<<<<<<<
+COMMENTS
+>>>>>>>>>>
+	- similar to Java
+	- use "//" for single line comment
+	- use "/*  .... */" for muti-line comment
+	- use "echo" to print statements
+		- echo "Hello World"

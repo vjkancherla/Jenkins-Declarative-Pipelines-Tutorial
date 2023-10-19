@@ -1,0 +1,23 @@
+<<<<<<<<<<<<<<<<<<<<<<<
+STRING CONCATENATION
+>>>>>>>>>>>>>>>>>>>>>>>
+	- very similar to Java, uses "+" operator	
+	
+	eg1: 
+	===
+	script {
+		NAME = "VJ"
+		LNAME = "KAN"
+		FULLNAME = NAME+""+LNAME
+	}
+	echo "$FULLNAME" --> Outputs "VJ KAN"
+	===
+	
+	eg2: 
+	===
+	script {
+		NAME = "VJ"
+		LNAME = "KAN"
+	}
+	echo "$FNAME $LNAME" --> Outputs "VJ KAN"
+	===

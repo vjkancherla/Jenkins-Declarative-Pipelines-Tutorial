@@ -1,0 +1,92 @@
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+EXECUTING TASKS/STEPS/JOBS IN PARALLEL
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+- The "parallel" directive in Jenkins Pipeline allows you to execute multiple stages or tasks concurrently.
+
+	=====
+	pipeline {
+		agent any
+
+		stages {
+			stage('Parallel Stages') {
+				parallel {
+					stage('Stage 1') {
+						steps {
+							echo 'Executing Stage 1'
+						}
+					}
+					stage('Stage 2') {
+						steps {
+							echo 'Executing Stage 2'
+						}
+					}
+				}
+			}
+		}
+	}
+	=====
+
+- TRIGGERING DOWNSTREAM JOBS IN PARALLEL
+
+	=====
+	<Two Downstream Job's - A, B - With the same pipeline syntax>
+	pipeline {
+		agent any
+
+		parameters {
+			string(name: 'parent_job_name', defaultValue: 'some_parent_job', description: 'Specify the Parent job\'s name')
+			string(name: 'parent_job_build_no', defaultValue: '0000', description: 'Specify the Parent job\'s build number')
+		}
+
+		stages {
+			stage('Stage-X') {
+				steps {
+					script {
+						echo "PARENT JOB NAME: ${params.parent_job_name}"
+						echo "PARENT JOB BUILD NO: ${params.parent_job_build_no}"
+						echo ""
+						echo "LOCAL JOB NAME: ${JOB_NAME}"
+						echo "LOCAL JOB BUILD NO: ${BUILD_NUMBER}"
+						
+					}
+				}
+			}
+		}
+	}
+
+	=====
+
+	=====
+	pipeline {
+		agent any
+
+		stages {
+			stage('Trigger Downstream Jobs') {
+			    parallel {
+			        stage ("Run-Job-A") {
+			            steps {
+        					build(job: 'Pipeline-Downstream-Job-A', parameters: [
+        						string(name: 'parent_job_name', value: "${JOB_NAME}"),
+        						string(name: 'parent_job_build_no', value: "${BUILD_NUMBER}"),
+        						],
+        						propagate: false, wait: true
+        					)
+        				}
+			        }
+			        
+			        stage ("Run-Job-B") {
+			            steps {
+        					build(job: 'Pipeline-Downstream-Job-B', parameters: [
+        						string(name: 'parent_job_name', value: "${JOB_NAME}"),
+        						string(name: 'parent_job_build_no', value: "${BUILD_NUMBER}"),
+        						],
+        						propagate: false, wait: true
+        					)
+        				}
+			        }
+			    }
+				
+			}
+		}
+	}
+	=====

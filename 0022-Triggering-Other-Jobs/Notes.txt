@@ -1,0 +1,104 @@
+<<<<<<<<<<<<<<<<<<<<
+TRIGERRING BUILDS
+>>>>>>>>>>>>>>>>>>>>>
+
+- TRIGGERING ANOTHER/OTHER DOWNSTREAM JOBS/PIPELINES FROM WITHIN A PIPELINE
+    - use the "build" step
+    - https://www.jenkins.io/doc/pipeline/steps/pipeline-build-step/
+
+
+	=====
+	<Two Downstream Job's - A, B - With the same pipeline syntax>
+	pipeline {
+		agent any
+
+		parameters {
+			string(name: 'parent_job_name', defaultValue: 'some_parent_job', description: 'Specify the Parent job\'s name')
+			string(name: 'parent_job_build_no', defaultValue: '0000', description: 'Specify the Parent job\'s build number')
+		}
+
+		stages {
+			stage('Stage-X') {
+				steps {
+					script {
+						echo "PARENT JOB NAME: ${params.parent_job_name}"
+						echo "PARENT JOB BUILD NO: ${params.parent_job_build_no}"
+						echo ""
+						echo "LOCAL JOB NAME: ${JOB_NAME}"
+						echo "LOCAL JOB BUILD NO: ${BUILD_NUMBER}"
+						
+					}
+				}
+			}
+		}
+	}
+
+	=====
+
+	=====
+	pipeline {
+		agent any
+
+		stages {
+			stage('Trigger Downstream Job') {
+				steps {
+					build(job: 'Pipeline-Downstream-Job-A', parameters: [
+						string(name: 'parent_job_name', value: "${JOB_NAME}"),
+						string(name: 'parent_job_build_no', value: "${BUILD_NUMBER}"),
+						],
+						propagate: false, wait: true
+					)
+				}
+			}
+		}
+		
+		post {
+			success {
+				// Trigger Pipeline B upon successful completion
+    			build(job: 'Pipeline-Downstream-Job-B', parameters: [
+    						string(name: 'parent_job_name', value: "${JOB_NAME}"),
+						    string(name: 'parent_job_build_no', value: "${BUILD_NUMBER}"),
+    						],
+    						propagate: false, wait: true
+    					)
+			}
+		}
+	}
+	=====
+
+		- propagate: false is used to indicate that the current build should not fail if the downstream job (Downstream-Job) fails. 
+		- wait: true is optional but recommended when using propagate: false. It indicates that the current build should wait for the completion of the downstream job before moving on to the next steps in the pipeline.
+
+
+- [Option-1] TRIGGERING A DOWNSTREAM PIPELINE AUTOMATICALLY, WHEN A PIPLEINE COMPLETES
+	- we need to run Pipeline-B, only after the successfull completion of Pipeline-A
+
+	====
+	pipeline {
+		agent any
+
+		stages {
+			stage('Build and Test') {
+				steps {
+					// Your build and test steps here
+				}
+			}
+		}
+
+		post {
+			success {
+				// Trigger Pipeline B upon successful completion of Pipeline A
+				build job: 'Pipeline-B', wait: false
+			}
+		}
+	}
+	====
+
+
+- [Option-2] TRIGGERING A DOWNSTREAM PIPELINE AUTOMATICALLY, WHEN AN UPSTREAM PIPLEINE COMPLETES
+	- To configure a downstream pipeline to watch the upstream pipeline and then execute when the upstream pipeline completes, 
+	  you can use the "Build after other projects are built" trigger in Jenkins.
+
+	- This is helpful when you do not want to modify the upstream pipeline
+
+	- See: https://www.youtube.com/watch?v=TXPSgBwGrpg

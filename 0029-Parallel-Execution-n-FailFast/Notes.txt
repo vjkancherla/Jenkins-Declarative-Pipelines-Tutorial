@@ -1,0 +1,31 @@
+-USING "FAILFAST" TO FAIL THE WHOLE BUILD WHEN A PARALLEL TASK FAILS
+	- The failFast option in Jenkins Pipeline's parallel directive controls how the pipeline behaves 
+	  when one or more parallel branches (also known as stages) encounter a failure
+	- By default, if you don't specify the failFast option, Jenkins Pipeline will wait for all parallel branches 
+	  to complete before determining the overall result of the parallel block. 
+	- If you set "failFast: true", the behavior changes. When any of the parallel branches fails, the parallel block 
+	  will immediately mark the entire parallel block as failed, and the pipeline execution will be terminated f
+	  or all remaining parallel branches.
+
+	=====
+	pipeline {
+		agent any
+
+		stages {
+			stage('Parallel Stages') {
+				parallel (failFast: true) {
+					stage('Run DownStream Job-A') {
+						steps {
+							build(job: 'Pipeline-A-Job')
+						}
+					}
+					stage('Run DownStream Job-B') {
+						steps {
+							build(job: 'Pipeline-B-Job')
+						}
+					}
+				}
+			}
+		}
+	}
+	=====

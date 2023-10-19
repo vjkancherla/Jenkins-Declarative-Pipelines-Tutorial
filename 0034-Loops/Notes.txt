@@ -1,0 +1,31 @@
+=======
+LOOPS
+=======
+EXAMPLE: use the script step Groovy scripts
+	------
+	stage('Loop Example') {
+		steps {
+			script {
+				for (int i = 1; i <= 5; i++) {
+					echo "Iteration ${i}"
+					// Add your logic here
+				}
+			}
+		}
+	}
+	------
+
+EXAMPLE: using the popular "Jenkins Pipeline Utility Steps" plugin, which includes a for loop step
+	------
+	stage('Loop Example') {
+		steps {
+			script {
+				def items = [1, 2, 3, 4, 5]
+				for (item in items) {
+					echo "Iteration ${item}"
+					// Add your logic here
+				}
+			}
+		}
+	}
+	------

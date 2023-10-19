@@ -1,0 +1,43 @@
+=====================
+CREATING AGENT NODES
+=====================
+
+SSH AGENT NODES
+-----------------
+- Watch this Video: https://www.youtube.com/watch?v=99DddJiH7lM
+
+[1] Setup up a connection to a Physical/Virtual Ubuntu server using SSH
+
+[2] Define lables
+
+
+
+DOCKER CONTAINER AGENTS RUNNING ON A REMOTE MACHINE WITH DOCKER INSTALLED
+---------------------------------------------------------------------------
+- Watch this Video: https://www.youtube.com/watch?v=yb6DodK6mbg
+
+[1] Install Docker on a Ubuntu server
+
+[2] Enable Docker remote API 
+
+[3] In Jenkins, install the "Docker" Plugin
+
+[4] In Jenkins, create a new Docker Cloud from the "Cloud and Nodes" page, and connect to the Ubuntu server (from Step-1)
+
+[5] Verify Connectivity from Jenkins to Docker host
+
+
+
+DOCKER AGENT PODS RUNNING ON A KUBERNETES CLUSTER
+-------------------------------------------------------
+- Watch this Video: https://www.youtube.com/watch?v=ZXaorni-icg
+
+[1] Have a running K8s cluster
+
+[2] In Jenkins, install the "Kuberenetes" Plugin
+
+[3] In Jenins, create a "secret text" Global Credential using kubeconf file
+
+[4] In Jenkins, create a new Kuberenetes Cloud from the "Cloud and Nodes" page, and connect to the K8s cluster (from Step-1), using the Global credential
+
+[5] Verify Connectivity from Jenkins to Docker host

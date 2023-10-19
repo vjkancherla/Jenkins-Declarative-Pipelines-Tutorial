@@ -1,0 +1,35 @@
+===============
+JENKINS AGENT
+===============
+- In Jenkins, an agent, also known as a "Jenkins agent" or "Jenkins slave," is a machine or environment configured to 
+  execute jobs (builds, tests, deployments, etc.) on behalf of the Jenkins master server.
+
+
+TYPES OF AGENTS
+------------------
+- JNLP (Java Web Start) Agent: 
+    A common type of Jenkins agent is a JNLP agent.
+    It is launched via Java Web Start and allows Jenkins to start and manage agents dynamically. 
+    JNLP agents are suitable for various platforms.
+    
+- SSH Agent: 
+    Jenkins can also use SSH to communicate with agents. 
+    SSH agents are useful when you want to run builds on remote servers and prefer SSH connectivity for security reasons.
+
+- Docker Agent: 
+    Jenkins can launch Docker containers as agents, which provides a lightweight and isolated environment for builds. 
+    Docker agents can be used to build and test in different environments.
+
+- Windows Agent: 
+    You can configure Windows-based agents for Jenkins if you have specific build requirements on Windows platforms.
+
+- Custom Agents: 
+    Jenkins allows you to create custom agents tailored to your needs using custom scripts or tools.
+    Example: Kubernetes Pods
+
+
+NODE/AGENT CONFIGURATION
+---------------------------
+- Each Jenkins agent, also referred to as a "node," is configured with a specific set of labels and capabilities. 
+- Labels are used to tag agents, and jobs can be configured to run on agents with specific labels. 
+  This allows you to control which agents execute specific types of jobs based on their capabilities.

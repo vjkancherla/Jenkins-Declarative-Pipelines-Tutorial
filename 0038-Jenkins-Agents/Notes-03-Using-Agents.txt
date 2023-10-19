@@ -1,0 +1,122 @@
+=============================
+USING AGENTS FROM PIPELINES
+==============================
+
+https://www.jenkins.io/doc/book/pipeline/syntax/#agent
+
+TOP LEVEL AGENTS
+------------------
+- In agents declared at the top level of a Pipeline, an agent is allocated and then the timeout option is applied. 
+  The time to allocate the agent is not included in the limit set by the timeout option.
+
+EXAMPLE:
+  -----
+    pipeline {
+        agent any
+        options {
+            // Timeout counter starts AFTER agent is allocated
+            timeout(time: 1, unit: 'SECONDS')
+        }
+        stages {
+            stage('Example') {
+                steps {
+                    echo 'Hello World'
+                }
+            }
+        }
+    }
+  -----
+
+
+STAGE LEVEL AGENTS
+--------------------
+- In agents declared within a stage, the "options" are invoked before allocating the agent and before checking any when conditions. 
+  In this case, when using "timeout", it is applied before the agent is allocated. The time to allocate the agent is included in the 
+  limit set by the "timeout" option.
+
+EXAMPLE:
+    -----
+    pipeline {
+        agent none
+        stages {
+            stage('Example') {
+                agent any
+                options {
+                    // Timeout counter starts BEFORE agent is allocated
+                    timeout(time: 1, unit: 'SECONDS')
+                }
+                steps {
+                    echo 'Hello World'
+                }
+            }
+        }
+    }
+    -----
+
+
+SPECIFYING/CHOOSING AN AGENT "TYPE"
+------------------------------------
+
+- Agent type "any"
+    - Execute the Pipeline, or stage, on any available agent.
+    EXAMPLE:
+        ----
+        pipeline {
+            agent any
+        }
+        ----
+
+
+- Agent type "none"
+    - When applied at the top-level of the pipeline block no **global agent will be allocated for the entire Pipeline run** and 
+      **each stage section will need to contain its own agent section**.
+    EXAMPLE:
+        ----
+        pipeline {
+            agent none
+        }
+        ----
+
+- Agent with a specified "label"
+    - Execute the Pipeline, or stage, on an agent available in the Jenkins environment with the provided label. 
+    - NOTE that a ssh-based-node/docker-host-node/pod-template should already have been defined with the required labels.
+
+    EXAMPLE:
+        ----
+        pipeline {
+            agent { 
+                label 'my-defined-label' 
+            }
+        }
+        ----
+    
+    Label conditions can also be used:
+    EXAMPLE:
+        ---
+        pipeline {
+            agent { 
+                label 'my-label1 && my-label2' 
+            }
+            OR
+            agent { 
+                label 'my-label1 || my-label2' 
+            }
+        }
+        ---
+
+
+- Agent running as Dynamically provisioned Docker Container
+    - Execute the Pipeline, or stage, with the given container which will be dynamically provisioned on a node pre-configured 
+      to accept Docker-based Pipelines.
+    - Watch video: https://www.youtube.com/watch?v=ymI02j-hqpU&t=223s
+
+    EXAMPLE:
+        -----
+        agent {
+            docker {
+                image 'maven:3.9.3-eclipse-temurin-17'
+                label 'my-defined-label' <---- select the Docker host node with this label
+                args  '-v /tmp:/tmp'
+            }
+        }
+        -----

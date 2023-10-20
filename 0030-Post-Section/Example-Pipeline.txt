@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+    
+    tools {
+            maven 'myglobal-maven-v3.9.5' 
+         }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Pull the latest code
+                git 'https://github.com/jenkins-docs/simple-java-maven-app'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // Commands to build your application
+                sh 'mvn install'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Commands to run your unit tests
+                sh 'mvn test'
+            }
+        }
+
+        stage('Archive') {
+            steps {
+                // Archive the built artifacts if the previous stages succeeded
+                archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
+            }
+        }
+    }
+
+    post {
+        always {
+            // Actions that should be executed regardless of the build status
+            echo 'This will always run'
+        }
+
+        success {
+            // Actions that should be executed if the pipeline succeeded
+            echo 'Build succeeded!'
+            emailext (
+                subject: "Build Succeeded: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
+                body: "Check the build details at ${env.BUILD_URL}",
+                to: 'dev1@example.com,dev2@example.com'
+            )
+        }
+
+        failure {
+            // Actions that should be executed if the pipeline failed
+            echo 'Build failed!'
+            emailext (
+                subject: "Build Failed: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
+                body: "Check the build details at ${env.BUILD_URL}",
+                to: 'dev1@example.com,dev2@example.com'
+            )
+        }
+
+        cleanup {
+            // Cleanup actions after the pipeline execution
+            echo 'Cleaning up...'
+            deleteDir()  // Deletes the workspace to free up space
+        }
+    }
+}

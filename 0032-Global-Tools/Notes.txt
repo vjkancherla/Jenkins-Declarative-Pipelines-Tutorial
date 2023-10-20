@@ -13,4 +13,32 @@ MANAGING GLOBAL TOOLS
             These variables allow you to reference the configured tool installations in your build scripts or commands.
 
 - See this video for installing and using global tools (default and custom):
-	- https://www.youtube.com/watch?v=L9Ite-1pEU8
+	- https://www.youtube.com/watch?v=V-VFrYF_Z1Y
+
+
+EXAMPLE: INSTALLING A SPECIFIC MAVEN VERSION USING GLOBAL TOOLS AND USING IT IN A PIPELINE
+   [1] Go to Jenkins console > Manage Jenkins > Tools
+   [2] Scroll down to Maven section and click on add.
+   [3] Add a new Maven version:
+      - name: myglobal-maven-v3.9.5
+        version: 3.9.5
+        select "install automatically"
+
+   Pipeline:
+      ----
+      pipeline {
+         agent any
+         
+         tools {
+            maven 'myglobal-maven-v3.9.5' 
+         }
+
+         stages {
+            stage('Build Tools') {
+                  steps {
+                     sh "mvn --version"
+                  }
+            }
+         }
+      }
+      ---- 

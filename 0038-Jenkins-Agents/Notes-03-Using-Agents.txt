@@ -105,7 +105,7 @@ SPECIFYING/CHOOSING AN AGENT "TYPE"
         ---
 
 
-- Agent running as Dynamically provisioned Docker Container
+- Agent running as a Dynamically provisioned Docker Container, from a pre-existing Docker image
     - Execute the Pipeline, or stage, with the given container which will be dynamically provisioned on a node pre-configured 
       to accept Docker-based Pipelines.
     - Watch video: https://www.youtube.com/watch?v=ymI02j-hqpU&t=223s
@@ -117,6 +117,65 @@ SPECIFYING/CHOOSING AN AGENT "TYPE"
                 image 'maven:3.9.3-eclipse-temurin-17'
                 label 'my-defined-label' <---- select the Docker host node with this label
                 args  '-v /tmp:/tmp'
+            }
+        }
+        -----
+
+    IMPORTANT: The "label" is used to select a pre-existing Docker host node with that label
+
+
+- Agent running as a Dynamically provisioned Docker Container, created from the specified Dockerfile
+    - Execute the Pipeline, or stage, with a container built from a Dockerfile contained in the source repository. 
+
+    EXAMPLE:
+        ------
+        agent {
+            // Equivalent to "docker build -f Dockerfile.build --build-arg version=1.0.2 ./build/
+            dockerfile {
+                filename 'Dockerfile.build'
+                dir 'build'
+                label 'my-defined-label'
+                additionalBuildArgs  '--build-arg version=1.0.2'
+                args '-v /tmp:/tmp'
+            }
+        }
+        ------
+
+
+- Agent deployed as a Pod inside a Kubernetes cluster
+    - Execute the Pipeline, or stage, inside a pod deployed on a Kubernetes cluster.
+    - The Agent's Pod template is defined inside the kubernetes { } block.
+    - Watch this vide: https://www.youtube.com/watch?v=ZXaorni-icg
+
+    EXAMPLE: if you want a pod with a Kaniko container inside it,
+        -----
+        agent {
+            kubernetes {
+                defaultContainer 'kaniko'
+                yaml '''
+                    kind: Pod
+                    spec:
+                    containers:
+                    - name: kaniko
+                        image: gcr.io/kaniko-project/executor:debug
+                        imagePullPolicy: Always
+                        command:
+                        - sleep
+                        args:
+                        - 99d
+                        volumeMounts:
+                        - name: aws-secret
+                            mountPath: /root/.aws/
+                        - name: docker-registry-config
+                            mountPath: /kaniko/.docker
+                    volumes:
+                        - name: aws-secret
+                        secret:
+                            secretName: aws-secret
+                        - name: docker-registry-config
+                        configMap:
+                            name: docker-registry-config
+                '''
             }
         }
         -----

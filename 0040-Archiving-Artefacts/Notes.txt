@@ -1,0 +1,41 @@
+=====================
+ARCHIVING ARTEFACTS
+=====================
+- In a Jenkins pipeline, after the build step is complete, the output or the 'artifacts' (like compiled binaries, libraries, 
+  or .jar files) can be stored using the "archiveArtifacts" step. 
+
+- This ensures that post-build, these artifacts are available for other jobs, deployments, or simply for record-keeping purposes.
+
+EXAMPLE: Archiving jar files after a Maven build
+    -----
+    pipeline {
+        agent any
+        
+        tools {
+                maven 'myglobal-maven-v3.9.5' 
+            }
+
+        stages {
+            stage('Checkout') {
+                steps {
+                    // Pull the latest code
+                    git 'https://github.com/jenkins-docs/simple-java-maven-app'
+                }
+            }
+
+            stage('Build') {
+                steps {
+                    // Commands to build your application
+                    sh 'mvn install'
+                }
+            }
+
+            stage('Archive') {
+                steps {
+                    // Archive the built artifacts if the previous stages succeeded
+                    archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
+                }
+            }
+        }
+    }
+    -----

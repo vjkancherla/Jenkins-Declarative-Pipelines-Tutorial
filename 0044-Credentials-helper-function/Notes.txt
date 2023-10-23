@@ -1,0 +1,67 @@
+=============================
+credentials() HELPER METHOD 
+==============================
+- The credentials() function in Jenkins is typically used to retrieve the value of a stored credential directl
+
+- the "credentials()" helper method (used within the environment directive) supports secret text, username and password, 
+  as well as secret file credentials.
+
+EXAMPLE: Create environment variables From secrets
+    ------
+    pipeline {
+        agent {
+            // Define agent details here
+        }
+        environment {
+            AWS_ACCESS_KEY_ID     = credentials('jenkins-aws-secret-key-id')
+            AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws-secret-access-key')
+        }
+    }
+    ------
+    In this example, two secret text credentials are assigned to separate environment variables to access Amazon Web Services (AWS). 
+
+
+EXAMPLE: Create environment variables for username and password credentials
+    ------
+    pipeline {
+        agent {
+            // Define agent details here
+        }
+        environment {
+            BITBUCKET_COMMON_CREDS = credentials('jenkins-bitbucket-common-creds')
+        }
+    }
+    ------
+    In this example, username and password credentials are assigned to environment variables to access a Bitbucket repository in 
+    a common account or team for your organization; these credentials would have been configured in Jenkins with the 
+    credential ID jenkins-bitbucket-common-creds.
+
+    This actually sets the following three environment variables:
+
+    BITBUCKET_COMMON_CREDS - contains a username and a password separated by a colon in the format username:password.
+    BITBUCKET_COMMON_CREDS_USR - an additional variable containing the username component only.
+    BITBUCKET_COMMON_CREDS_PSW - an additional variable containing the password component only.
+
+
+EXAMPLE: Create an environment variable for the kube-config secret-file credential
+    ------
+    pipeline {
+        agent {
+            // Define agent details here
+        }
+        environment {
+            // The MY_KUBECONFIG environment variable will be assigned
+            // the value of a temporary file.  For example:
+            //   /home/user/.jenkins/workspace/cred_test@tmp/secretFiles/546a5cf3-9b56-4165-a0fd-19e2afe6b31f/kubeconfig.txt
+        
+            MY_KUBECONFIG = credentials('my-kubeconfig')
+        }
+        stages {
+            stage('Example stage 1') {
+                steps {
+                    sh("kubectl --kubeconfig $MY_KUBECONFIG get pods")
+                }
+            }
+        }
+    }
+    ------

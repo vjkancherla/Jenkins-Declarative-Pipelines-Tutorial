@@ -1,0 +1,44 @@
+=========================================
+ARCHIVING AND FINGERPRINTING ARTEFACTS
+==========================================
+- By enabling fingerprinting on an artifact, Jenkins creates a unique hash of the file, stores this hash, 
+  and then uses it to track the file's subsequent usage across different jobs or builds. 
+  
+- This can be very helpful, for instance, when trying to determine which builds of a common library have been used in 
+  different application builds.
+
+
+EXAMPLE: Archiving and fingerprinting jar files after a Maven build
+    -----
+    pipeline {
+        agent any
+        
+        tools {
+                maven 'myglobal-maven-v3.9.5' 
+            }
+
+        stages {
+            stage('Checkout') {
+                steps {
+                    // Pull the latest code
+                    git 'https://github.com/jenkins-docs/simple-java-maven-app'
+                }
+            }
+
+            stage('Build') {
+                steps {
+                    // Commands to build your application
+                    sh 'mvn install'
+                }
+            }
+
+            stage('Archive') {
+                steps {
+                    // Archive the built artifacts if the previous stages succeeded
+                    archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
+                    fingerprint '**/target/*.jar'
+                }
+            }
+        }
+    }
+    -----

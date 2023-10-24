@@ -1,0 +1,60 @@
+========================
+"withCredentials" STEP
+========================
+
+- The withCredentials step in Jenkins pipelines is an essential tool for securely handling and using stored credentials within your CI/CD workflows
+
+EXAMPLE: Username and Password
+    -----
+    pipeline {
+        agent any
+
+        stages {
+            stage ("x") {
+                steps {
+                    withCredentials([usernamePassword(credentialsId: 'my-cred-id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        echo "Hello, $USERNAME"
+                        // Use $PASSWORD as required, but avoid echoing or printing it!
+                    }
+                }
+            }
+        }
+    }
+    -----
+
+
+EXAMPLE: Secret Text
+    -----
+    pipeline {
+        agent any
+
+        stages {
+            stage ("x") {
+                steps {
+                    withCredentials([string(credentialsId: 'my-secret-text-id', variable: 'MY_SECRET')]) {
+                        // Use the MY_SECRET variable as required
+                    }
+                }
+            }
+        }
+    }
+    -----
+
+
+EXAMPLE: SSH Private Key
+    -----
+    pipeline {
+        agent any
+
+        stages {
+            stage ("x") {
+                steps {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'my-ssh-id', keyFileVariable: 'SSH_KEY')]) {
+                        // Use the SSH_KEY variable as required
+                    }
+
+                }
+            }
+        }
+    }
+    -----

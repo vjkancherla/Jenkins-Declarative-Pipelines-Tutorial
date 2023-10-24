@@ -1,0 +1,63 @@
+================================
+"cleanWs()" TO CLEAN WORKSPACE
+================================
+- The cleanWs function (or step) in Jenkins declarative pipelines is provided by the Workspace Cleanup Plugin. 
+
+- Its primary purpose is to delete files and directories in the workspace, ensuring that you start with a clean slate 
+  for your build or any other operations. 
+  
+- This can be particularly useful to prevent disk space issues on agents, to ensure that leftover files from previous builds 
+  don't interfere with new builds, and to maintain general cleanliness and efficiency.
+
+EXAMPLE:
+    ------------
+    pipeline {
+        agent any
+
+        stages {
+            stage('Preparation') {
+                steps {
+                    cleanWs()
+                }
+            }
+
+            stage('Build') {
+                steps {
+                    // Your build steps go here
+                }
+            }
+        }
+
+        post {
+            always {
+                cleanWs()
+            }
+        }
+    }
+    ------------
+
+    In the above example, cleanWs is used at the start of the pipeline to ensure a clean workspace before the build begins. 
+    
+    Additionally, in the post block, it's used to clean the workspace after the build completes, regardless of whether the build was successful or failed.
+
+
+Parameters:
+--------------
+The cleanWs step also accepts some parameters to provide flexibility in what gets deleted.
+
+[1] deleteDirs: 
+    By default, cleanWs deletes only files and not directories. If you set deleteDirs: true, it will also delete directories in the workspace.
+
+    ----
+    cleanWs(deleteDirs: true)
+    ----
+
+[2] patterns: 
+    Allows you to specify file patterns to delete or to exclude from deletion.
+
+    ----
+    cleanWs(patterns: [
+        includePattern: '**/*.tmp',   // Delete all .tmp files
+        excludePattern: '**/important.log'  // But exclude important.log files
+    ])
+    ----

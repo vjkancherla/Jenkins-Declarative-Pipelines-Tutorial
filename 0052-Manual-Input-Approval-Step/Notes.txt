@@ -1,0 +1,63 @@
+===========================
+MANUAL INPUT/APPROVAL STEP
+============================
+- Adds the Pipeline input step to wait for human input or approval. A basic Proceed or Abort option is provided in the stage view.
+
+- The input step in Jenkins declarative pipelines is used to pause pipeline execution and prompt the user for input.
+
+- This step pauses Pipeline execution and allows the user to interact and control the flow of the build. 
+  Only a basic "proceed" or "abort" option is provided in the stage view.
+
+
+EXAMPLE-1: Suppose you want to pause the pipeline and ask the user if they wish to proceed. You can use the input step as follows:
+  ------
+  stage('Approval') {
+      steps {
+          script {
+              def userInput = input(message: 'Do you wish to continue?', ok: 'Proceed')
+              echo "User decided to: ${userInput}"
+          }
+      }
+  }
+  ------
+
+
+EXAMPLE-2: You can also ask the user to provide specific input using parameters:
+  ------
+  stage('Deploy') {
+      steps {
+          script {
+              def userResponse = input(message: 'Choose a deployment environment:', parameters: [choice(name: 'ENV', choices: ['Development', 'Staging', 'Production'], description: 'Where do you want to deploy?')])
+              echo "Deploying to: ${userResponse}"
+          }
+      }
+  }
+
+  ------
+
+
+EXAMPLE-3: You can add a timeout to the input step to ensure that the pipeline doesn't wait indefinitely:
+  ------
+  steps {
+    script {
+      timeout(time: 2, unit: 'HOURS') {
+          input(message: 'Do you wish to continue?', ok: 'Proceed')
+      }
+    }
+  }
+  ------
+
+  
+  EXAMPLE-4: Handling rejection
+    If a user rejects the input (i.e., they do not approve), the pipeline will be aborted. However, you can catch this and handle it gracefully:
+    -----
+    script {
+        try {
+            input(message: 'Do you wish to continue?', ok: 'Proceed')
+        } catch (e) {
+            echo "User did not approve. Aborting."
+            currentBuild.result = 'ABORTED'
+            return
+        }
+    }
+    -----

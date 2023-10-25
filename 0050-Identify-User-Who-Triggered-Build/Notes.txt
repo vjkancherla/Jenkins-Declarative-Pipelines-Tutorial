@@ -1,0 +1,45 @@
+==============================================
+DETERMINE THE USER WHO HAS TIGGERED THE BUILD
+==============================================
+
+REQUIRED PLUGIN: "Build User Vars" Plugin
+
+Once installed, this plugin sets several environment variables related to the user who started the build:
+
+BUILD_USER:	Full name (first name + last name)
+BUILD_USER_FIRST_NAME:	First name
+BUILD_USER_LAST_NAME:	Last name
+BUILD_USER_ID:	Jenkins user ID
+BUILD_USER_GROUPS:	Jenkins user groups
+BUILD_USER_EMAIL:	Email address
+
+EXAMPLE:
+    ------
+    pipeline {
+        agent any
+
+        stages {
+            stage('Identify User') {
+                steps {
+                    wrap([$class: 'BuildUser']) {
+                        script {
+                            def userId = env.BUILD_USER_ID
+                            
+                            echo "Build was triggered by: ${userId}"
+
+                            if ("$userId" == "SomeAdminUser") {
+                                echo "Admin User: Can Execute Priviliged Tasks"
+                            }
+                            else {
+                                echo "Not Admin User: Cannot Execute Priviliged Tasks"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    ------
+
+EXAMPLE: 
+

@@ -1,0 +1,42 @@
+===============================================
+ACCEPT INPUT/APPROVAL ONLY FROM SPECIFIC USERS
+===============================================
+
+USECASE: Only a specific user (a LEAD DEV or MANAGER) has the permissions to APPROVE INPUT
+
+Note: Jenkins administrators are able to respond to the input regardless of the value of the submitter. Login as "devuser" to test.
+
+    ------
+    pipeline {
+        agent any
+
+        stages {
+            stage('Deploy') {
+                steps {
+                    script {
+                        def userInput = input(
+                            id: 'userInput',
+                            message: 'Please approve deployment:',
+                            parameters: [choice(name: 'deployChoice', choices: ['Yes', 'No'], description: 'Approve deployment?')],
+                            submitter: 'AnManager,AnLeadDev',  // List of users allowed to submit
+                            submitterParameter: 'approvedBy'       // This will capture the name of the user who approved
+                        )
+
+                        echo "Choice: ${userInput['deployChoice']}"
+                        echo "Approved by: ${userInput['approvedBy']}"
+                    }
+                }
+            }
+        }
+    }
+    ------
+
+    In the example above:
+    [1] The submitter parameter in the input step is set to 'AnManager,AnLeadDev'. 
+        This means only users AnManager or AnLeadDev will be allowed to approve or provide input.
+
+    [2] The submitterParameter is used to capture the name of the user who provided the input or approval. 
+        This can be helpful for logging or auditing purposes.
+
+    Note: Jenkins administrators are able to respond to the input regardless of the value of the submitter. Login as "devuser" to test.
+

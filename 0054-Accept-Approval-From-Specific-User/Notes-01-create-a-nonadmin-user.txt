@@ -1,0 +1,27 @@
+==================================
+CREATE NON-ADMIN USER IN JENKINS
+===================================
+
+[1] Login to Jenkins as an Admin user
+
+[2] Go to "Manage Jenkins" > "User"
+
+[3] Click "Create User". Create a new user with the following details:
+    username: devuser
+    password: devuser
+    full name: Development User
+    email: devuser@example.com
+
+[3] Go to "Manage Jenkins" > "Security"
+
+[4] Under the "Security Realm" section, select "Jenkins’ own user database" 
+
+[5] Under the "Authorization" section, select "Project based Matrix Authorization security"
+
+[6] Click "Add user", and set User Id: devuser 
+
+[7] For "Development User", set te following permissions:
+    Overall: Read
+    Job: Build, Cancel, Read
+
+

@@ -1,0 +1,100 @@
+EXAMPLE: Nested condition
+------
+stage('Example Deploy') {
+    when {
+        allOf {
+            branch 'production'
+            environment name: 'DEPLOY_TO', value: 'production'
+        }
+    }
+    steps {
+        echo 'Deploying'
+    }
+}
+------
+
+
+EXAMPLE: Multiple condition and nested condition
+------
+stage('Example Deploy') {
+    when {
+        branch 'production'
+        anyOf {
+            environment name: 'DEPLOY_TO', value: 'production'
+            environment name: 'DEPLOY_TO', value: 'staging'
+        }
+    }
+    steps {
+        echo 'Deploying'
+    }
+}
+------
+
+
+EXAMPLE: Expression condition and nested condition
+--------
+stage('Example Deploy') {
+    when {
+        expression { BRANCH_NAME ==~ /(production|staging)/ }
+        anyOf {
+            environment name: 'DEPLOY_TO', value: 'production'
+            environment name: 'DEPLOY_TO', value: 'staging'
+        }
+    }
+    steps {
+        echo 'Deploying'
+    }
+}
+--------
+
+
+EXAMPLE: beforeAgent()
+--------
+stage('Example Deploy') {
+    agent {
+        label "some-label"
+    }
+    when {
+        beforeAgent true
+        branch 'production'
+    }
+    steps {
+        echo 'Deploying'
+    }
+}
+--------
+
+
+EXAMPLE: beforeInput()
+---------
+stage('Example Deploy') {
+    when {
+        beforeInput true
+        branch 'production'
+    }
+    input {
+        message "Deploy to production?"
+        id "simple-input"
+    }
+    steps {
+        echo 'Deploying'
+    }
+}
+---------
+
+
+EXAMPLE: beforeOptions
+---------
+stage('Example Deploy') {
+    when {
+        beforeOptions true
+        branch 'testing'
+    }
+    options {
+        lock label: 'testing-deploy-envs', quantity: 1, variable: 'deployEnv'
+    }
+    steps {
+        echo "Deploying to ${deployEnv}"
+    }
+}
+---------

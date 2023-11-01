@@ -1,0 +1,222 @@
+===================
+WHEN DIRECTIVE
+===================
+- The when directive allows the Pipeline to determine whether the stage should be executed depending on the given condition.
+
+Built-In Conditions
+---------------------
+[1] Branch:
+        Execute the stage when the branch being built matches the branch pattern
+        
+        Example: Runs only if the current branch is 'main'.
+        -----
+        stage('Build') {
+            when {
+                branch 'main'
+            }
+            steps {
+                // build steps here
+            }
+        }
+        ------
+
+
+[2] Environment:
+        Execute the stage when the specified environment variable is set to the given value
+
+        Example: Runs only if the DEPLOY_ENV environment variable is set to 'production'.
+        -----
+        stage('Build') {
+            when {
+                environment name: 'DEPLOY_ENV', value: 'production'
+            }
+            steps {
+                // build steps here
+            }
+        }
+        -----
+
+
+[3] Expression:
+        You can use a Groovy expression as a condition. The stage will run only if the expression returns true.
+
+        Example: Runs only if the given Groovy expression evaluates to true.
+        -----
+        stage('Build') {
+            when {
+                expression { 
+                    return someVariable == 'someValue' 
+                }
+            }
+            steps {
+                // build steps here
+            }
+        }
+        -----
+
+
+[4] Changelog:
+        Execute the stage if the build’s SCM changelog contains a given regular expression pattern
+
+        Example: Runs only of the change log contains the string "DEPENDENCY"
+        -----
+        stage('Build') {
+            when { 
+                changelog '.*^\\[DEPENDENCY\\] .+$'
+            }
+            steps {
+                // build steps here
+            }
+        }
+        -----
+
+
+[5] Changeset:
+        Execute the stage if the build’s SCM changeset contains one or more files matching the given pattern
+        This condition will check for changes in a set of files or directories since the last successful build.
+        It can be useful for triggering builds based on changes in specific parts of the codebase.
+
+        Example: Runs only of the change set contains "*.js" files
+        -----
+        stage('Build') {
+            when { 
+                changeset "**/*.js"
+            }
+            steps {
+                // build steps here
+            }
+        }
+        ------
+
+
+[6] ChangeRequest:
+        The changeRequest condition in Jenkins Declarative Pipeline is used to determine if the current build is a pull request 
+        (also known as a merge request in some version control systems). 
+        When you use this condition within the when directive, you can specify additional criteria to further filter pull requests 
+        based on the target branch, the source branch, fork status, or even specific labels or comments.
+
+        Possible attributes are id, target, branch, fork, url, title, author, authorDisplayName, and authorEmail
+
+        Example: Run only for pull requests that target the 'main' branch
+        -----
+        stage('Build') {
+            when { 
+                changeRequest(target: 'main')
+            }
+            steps {
+                // build steps here
+            }
+        }
+        ------
+
+        Example: Run only for pull requests that have been created by a specific author
+        -----
+        stage('Build') {
+            when { 
+                authorEmail: "[\\w_-.]+@example.com", comparator: 'REGEXP'
+            }
+            steps {
+                // build steps here
+            }
+        }
+        ------
+
+
+[7] Equals:
+        Execute the stage when the expected value is equal to the actual value
+
+        Example: Run only when buildnumber = 2
+        -----
+        stage('Build') {
+            when { 
+                equals expected: 2, actual: currentBuild.number 
+            }
+            steps {
+                // build steps here
+            }
+        }
+        ------
+
+
+[8] NotEquals:
+        Runs only if two given values are not equal
+
+        Example: Run only when BUILD_TYPE parameter does not equal 'nightly'
+        -----
+        stage('Build') {
+            when { 
+                notEquals expected: 'nightly', actual: params.BUILD_TYPE
+            }
+            steps {
+                // build steps here
+            }
+        }
+        ------
+
+
+[9] Not:
+        Execute the stage when the nested condition is false. 
+        Must contain one condition.
+
+        Example: Run only when branch is not Master
+        -----
+        stage('Build') {
+            when { 
+                not { 
+                    branch 'master' 
+                } 
+            }
+            steps {
+                // build steps here
+            }
+        }
+        ------
+
+[10] AllOf:
+        Runs only if all nested conditions are true
+        Must contain at least one condition
+
+        Example:
+        -----
+        stage('Build') {
+            when { 
+                allOf {
+                    branch 'main'
+                    environment name: 'DEPLOY_TO', value: 'production'
+                } 
+            }
+            steps {
+                // build steps here
+            }
+        }
+        ------
+
+[11] AnyOf:
+        Execute the stage when at least one of the nested conditions is true. 
+        Must contain at least one condition
+
+        Example:
+        -----
+        stage('Build') {
+            when { 
+                anyOf { 
+                    branch 'master'
+                    branch 'staging' 
+                }
+            }
+            steps {
+                // build steps here
+            }
+        }
+        ------
+
+
+[12] TriggeredBy:
+        Execute the stage when the current build has been triggered by the param given
+
+        Examples:
+        ----
+        when { triggeredBy 'SCMTrigger' }
+        when { triggeredBy 'TimerTrigger' }
+        when { triggeredBy 'BuildUpstreamCause' }
+        when { triggeredBy cause: "UserIdCause", detail: "vlinde" } <-- runs only if the build was triggered by a user named 'vlinde'.

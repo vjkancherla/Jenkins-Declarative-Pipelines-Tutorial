@@ -27,7 +27,7 @@ Example:
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<
 RUNNING MULTIPLE COMMANDS
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	- use tripe quotes - """
+	- use triple quotes - """
 	- eg:
 		====
 		sh """
